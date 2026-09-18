@@ -1,0 +1,19 @@
+# Competition data from AIcrowd
+/data/
+*.csv
+
+# Python environments and bytecode
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Test and notebook artefacts
+.pytest_cache/
+.ipynb_checkpoints/
+
+# OS/editor artefacts
+.DS_Store
+Thumbs.db
+.vscode/
+
