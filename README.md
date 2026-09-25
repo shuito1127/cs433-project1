@@ -14,7 +14,7 @@ This repository is the team workspace for EPFL CS-433 Machine Learning Project 1
 Download the project data from AIcrowd and place the CSV files directly in the `data/` directory:
 
 ```text
-data/
+dataset/
 ├── x_train.csv
 ├── y_train.csv
 └── x_test.csv
