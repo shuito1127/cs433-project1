@@ -25,7 +25,7 @@ def train_val_split(X, y, val_ratio, seed=42):
 
 def fit_standardize(x):
     centered_data = np.mean(x, axis=0)
-    std=np.std(centered_data,axis=0)
+    std=np.std(x,axis=0)
     std_data = (x-centered_data) / std
     return std_data, centered_data, std
 
