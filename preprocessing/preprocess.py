@@ -1,4 +1,5 @@
 import numpy as np
+
 def train_val_split(X, y, val_ratio, seed=42):
     assert len(X) == len(y)
     assert 0 < val_ratio < 1
@@ -21,3 +22,13 @@ def train_val_split(X, y, val_ratio, seed=42):
     y_val = y[val_indices]
 
     return X_train, X_val, y_train, y_val
+
+def fit_standardize(x):
+    centered_data = np.mean(x, axis=0)
+    std=np.std(centered_data,axis=0)
+    std_data = (x-centered_data) / std
+    return std_data, centered_data, std
+
+def transform_standarize(x,centered_data,std):
+    return (x-centered_data)/std
+
