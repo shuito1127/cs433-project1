@@ -15,12 +15,17 @@ cs433-project1/
 ├── docs/project1_description.pdf
 ├── experiments/
 │   ├── Shu_notebook.ipynb        # Exploratory analysis and baseline experiments
-│   └── Shu.run.ipynb             # Train/validation preprocessing and ridge baseline
-├── preprocessing/preprocess.py  # Split and standardization helpers
+│   ├── Shu.run.ipynb             # Train/validation preprocessing and ridge baseline
+│   ├── Yusen_least_squares_ridge.ipynb # Reproduce Shu and compare shared models
+│   ├── yusen_baseline_results.json    # Saved validation metrics and provenance
+│   └── README.md                # Experiment instructions
+├── preprocessing/
+│   ├── preprocess.py            # Split and standardization helpers
+│   └── shu_baseline_config.py   # Snapshot of Shu's feature groups and code rules
 ├── grading_tests/               # Unmodified snapshot of course public tests
 ├── report/latex-example-paper/  # Complete course LaTeX example and supporting files
 ├── helpers.py                   # Course CSV loading and submission helpers
-├── implementations.py           # Six required algorithm interfaces (currently stubs)
+├── implementations.py           # Least squares and ridge implemented; four stubs remain
 └── run.py                       # Final pipeline entry point (currently a stub)
 ```
 
@@ -45,7 +50,13 @@ Open `Shu.run.ipynb` for the focused baseline or `Shu_notebook.ipynb` for the ex
 
 The notebook code and saved outputs have been preserved. Saved metrics are historical outputs, not a fresh validation of this integration. `Shu.run.ipynb` splits training and validation data before fitting imputation and scaling parameters; parts of `Shu_notebook.ipynb` impute before splitting and should be treated as exploratory work.
 
-`implementations.py` and `run.py` still contain `pass` placeholders. Running `python run.py` does not yet train a model or generate a submission. Completing those files is separate from integrating the starter materials.
+`implementations.py` now implements `least_squares` and `ridge_regression` using the lab ex03 normal equations. Both return `(w, loss)`, with `loss = mean((y - tx @ w)**2) / 2`; Ridge's returned loss excludes the regularization penalty. See [Least Squares and Ridge notes](docs/least_squares_ridge.md) for formulas, assumptions, and a usage example.
+
+The other four algorithms and `run.py` still contain `pass` placeholders. Running `python run.py` does not yet train a model or generate a submission. Shu's notebooks retain their original local function definitions; importing these implementations and unpacking `(w, loss)` is necessary to use the shared versions.
+
+## Yusen's baseline comparison
+
+For a comparison on the actual dataset, see [Yusen's baseline notebook](experiments/Yusen_least_squares_ridge.ipynb) and the [experiment guide](experiments/README.md). It reproduces Shu's fixed split, preprocessing, Ridge regularization, and threshold. The original matrix has two exact redundant columns, so after reproducing Ridge on the original inputs, it compares shared Least Squares and Ridge on the same reduced, full-rank inputs. Validation metrics and file hashes are saved in [the results summary](experiments/yusen_baseline_results.json).
 
 ## Course public tests
 
@@ -57,7 +68,13 @@ conda activate project1-grading
 python -m pytest grading_tests --github_link . -k "not test_github_link_format"
 ```
 
-The local command excludes only the GitHub URL-format check. Algorithm tests are expected to fail while the required functions remain stubs. The grading environment includes testing dependencies; it is not a list of libraries permitted in the submitted implementation. Follow the project description for those restrictions.
+The local command excludes only the GitHub URL-format check. Tests for the four unimplemented algorithms are expected to fail. To run just the three numerical public tests for Least Squares and Ridge:
+
+```sh
+python -m pytest grading_tests --github_link . -k "test_least_squares or test_ridge_regression"
+```
+
+The grading environment includes testing dependencies; it is not a list of libraries permitted in the submitted implementation. Follow the project description for those restrictions.
 
 The course recommends running tests from its own repository to receive updates. A snapshot is included here to support working entirely inside this folder; check the course repository for updates before final validation. Passing public tests does not guarantee full grading credit.
 
