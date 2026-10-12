@@ -1,36 +1,84 @@
-# EPFL CS-433 Machine Learning — Project 1
+﻿# EPFL CS-433 Machine Learning — Project 1
 
-This repository is the team workspace for EPFL CS-433 Machine Learning Project 1. It contains the project structure, experiments, and the final submission entry point.
+This repository is the team's working directory. It contains Shu's experiments, course starter materials, and the interfaces for the final submission. Open `cs433-project1/` as your IDE workspace; daily work does not require the sibling course starter folder.
 
-## Setup
-
-1. Clone this repository.
-2. Create and activate a Python environment compatible with the course requirements.
-3. Install the packages required by the course (at minimum, NumPy).
-4. Place the AIcrowd data files as described below.
-
-## Data
-
-Download the project data from AIcrowd and place the CSV files directly in the `data/` directory:
+## Repository layout
 
 ```text
-dataset/
-├── x_train.csv
-├── y_train.csv
-└── x_test.csv
+cs433-project1/
+├── dataset/                     # Local competition CSVs (ignored by Git)
+│   ├── x_train.csv
+│   ├── y_train.csv
+│   ├── x_test.csv
+│   └── sample_submission.csv
+├── codebook/                    # Three BRFSS PDFs and reading guide
+├── docs/project1_description.pdf
+├── experiments/
+│   ├── Shu_notebook.ipynb        # Exploratory analysis and baseline experiments
+│   └── Shu.run.ipynb             # Train/validation preprocessing and ridge baseline
+├── preprocessing/preprocess.py  # Split and standardization helpers
+├── grading_tests/               # Unmodified snapshot of course public tests
+├── report/latex-example-paper/  # Complete course LaTeX example and supporting files
+├── helpers.py                   # Course CSV loading and submission helpers
+├── implementations.py           # Six required algorithm interfaces (currently stubs)
+└── run.py                       # Final pipeline entry point (currently a stub)
 ```
 
-The `data/` directory and all CSV files are intentionally excluded from Git. Do not commit the competition data.
+## Setup and data
 
-## Required files
+1. Create a Python environment compatible with the [project requirements](docs/project1_description.pdf). The existing notebooks use NumPy and Matplotlib; install Jupyter support to run them.
+2. Place the course/AIcrowd CSV files in `dataset/`, directly under the repository root. This local workspace already contains copies from the course starter dataset. Teammates cloning the repository must supply their own data.
+3. Read [codebook/README.md](codebook/README.md) for field meanings, special value codes, and derived-variable documentation.
 
-- `implementations.py` — required functions specified by the project statement.
-- `run.py` — entry point for the final prediction pipeline.
-- `README.md` — project instructions and setup notes.
-- `.gitignore` — prevents local data, generated files, and environment artefacts from being committed.
-- `experiments/` — optional notebooks or scripts for reproducible experiments.
+`dataset/`, the legacy `data/` path, and all CSV files are ignored by Git. Do not commit competition data or generated submission CSVs. The CDC documentation describes the source survey; use the course-provided CSVs for model development.
+
+## Running Shu's experiments
+
+From the repository root, launch Jupyter with:
+
+```sh
+cd experiments
+jupyter lab
+```
+
+Open `Shu.run.ipynb` for the focused baseline or `Shu_notebook.ipynb` for the exploratory work. With a kernel working directory of `experiments/`, the existing `../dataset` paths and parent-directory helper imports resolve within this repository. In an IDE, check `Path.cwd()` in the notebook and select `experiments/` as the kernel working directory if necessary.
+
+The notebook code and saved outputs have been preserved. Saved metrics are historical outputs, not a fresh validation of this integration. `Shu.run.ipynb` splits training and validation data before fitting imputation and scaling parameters; parts of `Shu_notebook.ipynb` impute before splitting and should be treated as exploratory work.
+
+`implementations.py` and `run.py` still contain `pass` placeholders. Running `python run.py` does not yet train a model or generate a submission. Completing those files is separate from integrating the starter materials.
+
+## Course public tests
+
+The original instructions and environment specification are in [grading_tests/INSTRUCTIONS.md](grading_tests/INSTRUCTIONS.md) and [grading_tests/environment.yml](grading_tests/environment.yml). With Conda and Git installed, create the supplied grading environment from the repository root:
+
+```sh
+conda env create --file grading_tests/environment.yml --name project1-grading
+conda activate project1-grading
+python -m pytest grading_tests --github_link . -k "not test_github_link_format"
+```
+
+The local command excludes only the GitHub URL-format check. Algorithm tests are expected to fail while the required functions remain stubs. The grading environment includes testing dependencies; it is not a list of libraries permitted in the submitted implementation. Follow the project description for those restrictions.
+
+The course recommends running tests from its own repository to receive updates. A snapshot is included here to support working entirely inside this folder; check the course repository for updates before final validation. Passing public tests does not guarantee full grading credit.
+
+## Report
+
+The complete starter template is in [report/latex-example-paper/](report/latex-example-paper/), including the example PDF, TeX source, bibliography, class/style files, and figures. Work from that directory when compiling the template so its relative references resolve.
+
+## Integration notes
+
+Course starter materials were copied into this workspace as follows:
+
+| Original path in the sibling `project1/` folder | Destination here |
+| --- | --- |
+| `data/dataset_to_release/dataset/*.csv` | `dataset/` |
+| `file/project1_description.pdf` | `docs/project1_description.pdf` |
+| `grading_tests/` | `grading_tests/` |
+| `latex-example-paper/` | `report/latex-example-paper/` |
+| `helpers.py` | Existing `helpers.py` retained; SHA-256 matched the starter file |
+
+The original starter folder remains available as a reference. Shu's notebooks, preprocessing code, algorithm interfaces, and entry point were preserved. The separate `reference_4_proj1/` lab examples were not part of this starter-folder integration.
 
 ## Team workflow
 
-Create a feature branch for each contribution, open a pull request, and merge reviewed changes into `main`.
-
+Work on your own feature branch, review changes through a pull request, and merge agreed changes into `main`. Share code and documentation through Git; each teammate maintains their local `dataset/` directory.
