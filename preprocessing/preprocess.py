@@ -23,6 +23,15 @@ def train_val_split(X, y, val_ratio, seed=42):
 
     return X_train, X_val, y_train, y_val
 
+def fit_mean_imputation(x):
+    mean=np.nanmean(x,axis=0)
+    x_new=np.where(np.isnan(x),mean,x)
+    return x_new, mean
+
+def transform_mean_imputation(x,mean):
+    x_new=np.where(np.isnan(x),mean,x)
+    return x_new
+
 def fit_standardize(x):
     centered_data = np.mean(x, axis=0)
     std=np.std(x,axis=0)
