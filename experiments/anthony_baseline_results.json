@@ -1,0 +1,85 @@
+{
+  "experiment": "Anthony GD/SGD smaller-feature baseline",
+  "python": "3.9.23",
+  "numpy": "1.23.1",
+  "split": {
+    "seed": 42,
+    "validation_fraction": 0.25,
+    "training_rows": 246102,
+    "validation_rows": 82033,
+    "stratified": false
+  },
+  "features": {
+    "source_columns": 116,
+    "model_columns_including_intercept": 117,
+    "one_hot": false,
+    "missing_code_corrections": {
+      "MAXVO2_": 999,
+      "FC60_": 999,
+      "PAFREQ1_": 99,
+      "PAFREQ2_": 99,
+      "STRFREQ_": 99
+    }
+  },
+  "models": {
+    "GD": {
+      "updates": 300,
+      "gamma": 0.1257699175910341,
+      "gamma_rule": "1 / largest eigenvalue of X.T @ X / n",
+      "training_half_mse": 0.14246488750405678,
+      "seconds": 3.3805907500000014
+    },
+    "SGD": {
+      "updates": 738306,
+      "gamma": 1.965007665934639e-06,
+      "seed": 42,
+      "sampling": "one row per update, uniform with replacement",
+      "gamma_rule": "1 / maximum squared training-row length",
+      "training_half_mse": 0.14349309955129494,
+      "seconds": 2.317878457999999
+    }
+  },
+  "validation": [
+    {
+      "method": "Always -1",
+      "threshold": null,
+      "half_mse": null,
+      "f1": 0.0,
+      "accuracy": 0.9117672156327332
+    },
+    {
+      "method": "GD",
+      "threshold": 0.0,
+      "half_mse": 0.1426652264413905,
+      "f1": 0.0016551724137931034,
+      "accuracy": 0.9117672156327332
+    },
+    {
+      "method": "GD",
+      "threshold": -0.55,
+      "half_mse": 0.1426652264413905,
+      "f1": 0.3432884377643308,
+      "accuracy": 0.8769641485743542
+    },
+    {
+      "method": "SGD",
+      "threshold": 0.0,
+      "half_mse": 0.1436575185408622,
+      "f1": 0.0016554007449303353,
+      "accuracy": 0.9117794058488657
+    },
+    {
+      "method": "SGD",
+      "threshold": -0.55,
+      "half_mse": 0.1436575185408622,
+      "f1": 0.32769813362185557,
+      "accuracy": 0.8788048712103665
+    }
+  ],
+  "notes": [
+    "Initial weights are all zero; labels are -1/+1.",
+    "Training-fitted filling and scaling are reused on validation.",
+    "Threshold -0.55 is inherited from Shu, not tuned here.",
+    "These are local holdout results, not AIcrowd scores."
+  ]
+}

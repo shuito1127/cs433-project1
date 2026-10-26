@@ -1,5 +1,6 @@
 # Competition data from AIcrowd
 /data/
+/dataset/
 *.csv
 
 # Python environments and bytecode
@@ -13,7 +14,13 @@ __pycache__/
 .ipynb_checkpoints/
 
 # OS/editor artefacts
+/.idea/
 .DS_Store
 Thumbs.db
 .vscode/
 
+# Local course documents and external reference files
+/Project_1_External_Files/
+
+# Local copy of official grading tools
+/grading_tests/

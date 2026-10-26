@@ -1,0 +1,42 @@
+import numpy as np
+
+def train_val_split(X, y, val_ratio, seed=42):
+    assert len(X) == len(y)
+    assert 0 < val_ratio < 1
+    N = len(y)
+
+    rng = np.random.default_rng(seed)
+
+    indices = np.arange(N)
+
+    rng.shuffle(indices)
+
+    n_val = int(N*val_ratio)
+
+    val_indices = indices[:n_val]
+    train_indices = indices[n_val:]
+
+    X_train = X[train_indices]
+    X_val = X[val_indices]
+    y_train = y[train_indices]
+    y_val = y[val_indices]
+
+    return X_train, X_val, y_train, y_val
+
+def fit_mean_imputation(x):
+    mean=np.nanmean(x,axis=0)
+    x_new=np.where(np.isnan(x),mean,x)
+    return x_new, mean
+
+def transform_mean_imputation(x,mean):
+    x_new=np.where(np.isnan(x),mean,x)
+    return x_new
+
+def fit_standardize(x):
+    centered_data = np.mean(x, axis=0)
+    std=np.std(x,axis=0)
+    std_data = (x-centered_data) / std
+    return std_data, centered_data, std
+
+def transform_standarize(x,centered_data,std):
+    return (x-centered_data)/std
