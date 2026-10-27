@@ -1,0 +1,9 @@
+# Local LaTeX build products; maintain the source files in Git.
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.toc
+*.synctex.gz
+/output/overleaf-report.zip

@@ -1,0 +1,41 @@
+{
+  "training_signature": {
+    "data": "bfa447edece27d45b54f8f1486f6351a381885968d71c9eb1574fd1dbf0fa14a",
+    "labels": "bc974ff01bd82827e05780d106674ee680c918fc54225384cbf4f7b279422ec1",
+    "code": {
+      "implementations.py": "6ffe165d4e40633bf2c8f64c0931bbbfc3fdd20a52fa54a40ab162584d10863e",
+      "preprocessing/shu_reference.py": "b7089ff77f2ade9e0c79ac0e500dbe87929eac95470212f61c45498352fe6660",
+      "preprocessing/final_pipeline.py": "99f791c754573322d162c056856abba346d14f31e3a6f8bb8993e20f6639827a"
+    },
+    "fit": "all_labeled_rows"
+  },
+  "test_data_sha256": "28a7f5f94436a33b5dceb5dd15fd72563f31ec898124e382c123d3827203503c",
+  "model_artifact": {
+    "path": "models/yusen_linear_models.json",
+    "sha256": "0c24f76c1c379bf69700dc82d0adb0347f3d44523ce73ca7e80931be411c3b0d"
+  },
+  "expanded_columns": 1104,
+  "l1_selected_columns": 838,
+  "model_columns": 731,
+  "outputs": {
+    "least_squares": {
+      "path": "artifacts/submissions/yusen_least_squares.csv",
+      "sha256": "bb2b8f894af772f591fa7741e6dac0054ee36d6afa2621969ced790b5c39f310",
+      "rows": 109379,
+      "positive_predictions": 15394,
+      "lambda": null,
+      "threshold": -0.57,
+      "training_loss": 0.1293323105438083
+    },
+    "ridge": {
+      "path": "artifacts/submissions/yusen_ridge.csv",
+      "sha256": "e3a4f2c2a4d204e782fbbb9a2188e008224730670e71f1c97cb6e545145ba028",
+      "rows": 109379,
+      "positive_predictions": 14799,
+      "lambda": 0.0001,
+      "threshold": -0.56,
+      "training_loss": 0.12952062286144528
+    }
+  },
+  "aicrowd_uploaded": false
+}

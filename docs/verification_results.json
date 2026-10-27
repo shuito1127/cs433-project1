@@ -1,0 +1,92 @@
+{
+  "date": "2026-10-27",
+  "course_environment": {
+    "python": "3.9.25",
+    "numpy": "1.23.1",
+    "pytest": "7.1.2",
+    "black": "22.6.0"
+  },
+  "official_tests": {
+    "commit": "22f74faa9d408853c381640f240f741ea196841a",
+    "files": {
+      "conftest.py": {
+        "sha256": "c8c676f4897f2e4eb5cb30461141a53d13d8253f3760fc0a683ed90d8d6eb0ab",
+        "matches_local": true
+      },
+      "test_project1_public.py": {
+        "sha256": "a32d374d0787a7c557e223e43aeab72f1bdf96bd697125b89089d92ecf7f0774",
+        "matches_local": true
+      },
+      "environment.yml": {
+        "sha256": "60c1dbd48361d99776887f0e42f28cad07fc209edb0fdc3e13de6e4e250acd17",
+        "matches_local": true
+      },
+      "INSTRUCTIONS.md": {
+        "sha256": "32496090122ab005740106b20889d0001ca28b02de745ca36f5292e58918c1f6",
+        "matches_local": true
+      }
+    }
+  },
+  "test_suites": {
+    "course_local": {
+      "tests": "28",
+      "failures": "1",
+      "errors": "0",
+      "skipped": "0",
+      "failed_tests": [
+        "test_github_link_format"
+      ]
+    },
+    "adapter": {
+      "tests": "4",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "failed_tests": []
+    },
+    "commit_url_format": {
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "failed_tests": []
+    }
+  },
+  "scope": "Local working tree; separate existing-commit URL syntax check, not new remote-code validation.",
+  "prediction_repeat_hashes_match": true,
+  "prediction_hashes": {
+    "least_squares": "bb2b8f894af772f591fa7741e6dac0054ee36d6afa2621969ced790b5c39f310",
+    "ridge": "e3a4f2c2a4d204e782fbbb9a2188e008224730670e71f1c97cb6e545145ba028"
+  },
+  "cached_validation_repeat_matches_selected_settings": true,
+  "runtime_imports": [
+    "argparse",
+    "csv",
+    "experiments",
+    "gc",
+    "hashlib",
+    "helpers",
+    "implementations",
+    "itertools",
+    "json",
+    "numpy",
+    "os",
+    "pathlib",
+    "platform",
+    "preprocessing",
+    "time"
+  ],
+  "local_markdown_links_resolve": true,
+  "source_sha256": {
+    "run.py": "6c37a9f6f74513fb93d777528b10d0e8ebdced61eb3a68028f88c522d5192a45",
+    "implementations.py": "6ffe165d4e40633bf2c8f64c0931bbbfc3fdd20a52fa54a40ab162584d10863e",
+    "helpers.py": "8b82f69b8ab1d47cf9f65f14f008c50ddc20212e9d7e1207ecf92114cfb2703f",
+    "preprocessing/final_pipeline.py": "99f791c754573322d162c056856abba346d14f31e3a6f8bb8993e20f6639827a",
+    "preprocessing/preprocess.py": "225282f3e217da9c7129d3aa618bcf762b0da40f87cf66d0e7adbda57434353e",
+    "preprocessing/shu_baseline_config.py": "276b52dd1b0e93f0df7f208d1f8b89d9353ac473acbecd3a51c2ea26158c5039",
+    "preprocessing/shu_reference.py": "b7089ff77f2ade9e0c79ac0e500dbe87929eac95470212f61c45498352fe6660",
+    "experiments/evaluate_linear.py": "62d6ba2d8e69c742037d0c08676f3eafe747c42ac6f2076ea74c4ea87dd652a1",
+    "experiments/export_linear_results.py": "10c9cba437c2582b691fcbd9a872c56befdc42e0f7112d6e5c5713fa6be6591c",
+    "experiments/linear_io.py": "d0ceb9f4259f0413cf9241e808c2a2e13f55407de5831c28cb9b2777fda10604"
+  }
+}

@@ -1,25 +1,50 @@
-"""Required function interfaces for EPFL CS-433 Project 1.
+"""Course methods integrated from the team; see docs/integration.md."""
 
-Implement the algorithms collaboratively after deriving and testing them.
-"""
 
 import numpy as np
 
 
 def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
-    """Compute linear regression with gradient descent.
-
-    Parameters and return values must follow the Project 1 specification.
     """
-    pass
+    Linear regression using gradient descent.
+
+    Returns:
+        - w;        Final model weights.
+        - loss;     (0.5*) MSE, after full-batch GD.
+    """
+    w = initial_w.copy()
+    n = len(y)
+
+    for _ in range(max_iters):
+        errors = tx @ w - y
+        gradient = (tx.T @ errors) / n
+        w = w - (gamma * gradient)
+
+    errors = tx @ w - y
+    loss = 0.5 * np.mean(errors**2)
+    return w, loss
 
 
 def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma):
-    """Compute linear regression with stochastic gradient descent.
-
-    Parameters and return values must follow the Project 1 specification.
     """
-    pass
+    Linear regression using stochastic gradient descent.
+
+    Returns:
+        - w;        Final model weights.
+        - loss;     full-data, (0.5*) MSE, After single-example SGD.
+    """
+    w = initial_w.copy()
+    n = len(y)
+
+    for _ in range(max_iters):
+        i = np.random.randint(n)  # Pick random row (w/ replacement)
+        error = tx[i] @ w - y[i]
+        gradient = tx[i] * error  # No division by n. Only uses 1 example.
+        w = w - (gamma * gradient)
+
+    errors = tx @ w - y
+    loss = 0.5 * np.mean(errors**2)
+    return w, loss
 
 
 def least_squares(y, tx):
@@ -68,12 +93,49 @@ def ridge_regression(y, tx, lambda_):
     return w, loss
 
 
+def sigmoid(t):
+    t = np.clip(t, -500, 500)
+    return 1 / (1 + np.exp(-t))
+
+
+def calculate_logistic_loss(y, tx, w):
+    """
+    y:  (N,) with values {0, 1}
+    tx: (N, D)
+    w:  (D,)
+    """
+    z = tx @ w
+
+    loss = np.mean(np.logaddexp(0, z) - y * z)
+
+    return np.float64(loss)
+
+
+def calculate_logistic_gradient(y, tx, w):
+    """
+    Gradient of logistic loss.
+    """
+    p = sigmoid(tx @ w)
+
+    grad = tx.T @ (p - y) / len(y)
+
+    return grad
+
+
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
     """Compute logistic regression.
 
     Parameters and return values must follow the Project 1 specification.
     """
-    pass
+    w = initial_w.copy()
+
+    for _ in range(max_iters):
+        grad = calculate_logistic_gradient(y, tx, w)
+        w = w - gamma * grad
+
+    loss = calculate_logistic_loss(y, tx, w)
+
+    return w, loss
 
 
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
@@ -81,5 +143,25 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
 
     Parameters and return values must follow the Project 1 specification.
     """
-    pass
+    w = initial_w.copy()
 
+    for _ in range(max_iters):
+        grad = calculate_logistic_gradient(y, tx, w) + 2 * lambda_ * w
+        w = w - gamma * grad
+
+    loss = calculate_logistic_loss(y, tx, w)
+
+    return w, loss
+
+
+def l1reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
+    """Shu's L1 subgradient selector; penalizes every weight, including bias."""
+    w = initial_w.copy()
+
+    for _ in range(max_iters):
+        grad = calculate_logistic_gradient(y, tx, w) + lambda_ * np.sign(w)
+        w = w - gamma * grad
+
+    loss = calculate_logistic_loss(y, tx, w)
+
+    return w, loss

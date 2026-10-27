@@ -1,0 +1,40 @@
+% Measured results excerpt. Requires booktabs; adapt within the two-page report.
+\paragraph{Linear-model comparison.}
+We used a shuffled 75/25 training/validation split (seed 42;
+246,102/82,033 observations). Imputation, scaling, category vocabularies and
+supervised feature selection were fitted only on training observations.
+Shu's preprocessing used 5 one-value, 111 ordered, 14 decoded and 157 categorical
+variables. The L1 logistic selector used $\lambda=0.02$, step size $0.2$,
+2,000 iterations and an absolute-weight cutoff of $0.001$, retaining the bias.
+The expanded design had 1100 columns; L1 retained 844,
+and training-only rank reduction retained 734 independent columns
+for both least squares and ridge. Both used normal equations and returned
+$\|y-Xw\|^2/(2N)$, excluding the Ridge penalty. The fixed comparison used
+threshold $-0.55$ and Ridge $\lambda=0.001$.
+
+\begin{table}[t]
+\centering
+\caption{Local validation scores. Tuned rows reuse validation data for selection.}
+\begin{tabular}{lrr}
+\toprule
+Model & Accuracy & F1 \\
+\midrule
+Earlier least squares & 0.8771 & 0.3446 \\
+Earlier ridge & 0.8781 & 0.3434 \\
+Least squares, fixed & 0.8758 & 0.4289 \\
+Ridge, fixed & 0.8752 & 0.4296 \\
+Least squares, tuned & 0.8693 & 0.4291 \\
+Ridge, tuned & 0.8728 & 0.4298 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The selected Least Squares threshold was $-0.57$;
+Ridge selected $\lambda=0.0001$ and threshold $-0.56$.
+We searched six logarithmically spaced Ridge penalties from $10^{-5}$ to $1$
+and thresholds from $-0.90$ to $0.00$ in steps of $0.01$, maximizing validation F1.
+These tuned scores are model-selection estimates, not independent test results.
+The earlier and current fixed-setting comparisons share the same split; the
+pipeline change combines categorical encoding, decoding and feature selection,
+so its effect cannot be attributed to decoding alone. Full-data refitting
+generates separate candidate CSVs; their AIcrowd scores are not yet measured.

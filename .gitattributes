@@ -1,0 +1,7 @@
+# Keep source hashes and diffs stable across Windows and Unix checkouts.
+*.py text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.ipynb text eol=lf
+*.tex text eol=lf
+*.bib text eol=lf

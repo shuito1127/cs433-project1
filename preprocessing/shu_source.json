@@ -1,0 +1,16 @@
+{
+  "shu_branch": {
+    "commit": "f6baef4dd878ac79d030aa3c65cdda6e905a903b",
+    "url": "https://github.com/shuito1127/cs433-project1/tree/f6baef4dd878ac79d030aa3c65cdda6e905a903b"
+  },
+  "anthony_branch": {
+    "commit": "0af44c8a11ceaedbe786b699dc3f01a7c5a6d5c1",
+    "url": "https://github.com/shuito1127/cs433-project1/tree/0af44c8a11ceaedbe786b699dc3f01a7c5a6d5c1"
+  },
+  "yusen_branch": {
+    "commit": "e8e3e5f349b881a61b5932769d1676982fd9c7fc",
+    "url": "https://github.com/shuito1127/cs433-project1/tree/e8e3e5f349b881a61b5932769d1676982fd9c7fc"
+  },
+  "shu_run_sha256": "50085371285dc7d051b12b07e69e02d0c87be567b48c085ca27b802f65e09e44",
+  "extraction": "Top-level assignments and functions except main, without changes to definitions."
+}

@@ -1,0 +1,272 @@
+\documentclass[10pt,conference,compsocconf]{IEEEtran}
+
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage[hidelinks]{hyperref}
+
+\begin{document}
+\title{Linear Models for Heart-Disease Classification}
+\author{
+  Anthony Glegola \qquad Shu Ito \qquad Yusen Haung\\
+  \textit{CS-433 Machine Learning, Project 1}
+}
+\maketitle
+
+\begin{center}
+\footnotesize
+\textit{Working draft: updated linear-model results;
+final team comparison pending.}
+\end{center}
+
+\begin{abstract}
+We study classification of self-reported heart-disease history
+using the course-provided BRFSS 2015 dataset. We compare least
+squares and ridge regression under an earlier partial-feature
+baseline and an extended preprocessing pipeline incorporating
+categorical encoding, survey-code decoding, and supervised
+feature selection. On the same validation split and with fixed
+model settings, positive-class F1 increases from 0.3446 to
+0.4289 for least squares and from 0.3434 to 0.4296 for ridge.
+A subsequent parameter search provides only small additional
+gains. We document training-only preprocessing, numerical
+rank handling, implementation checks, and reproducible
+full-data candidate predictions.
+\end{abstract}
+
+\section{Introduction and Data}
+The task is to predict the binary \texttt{\_MICHD} label from
+health and lifestyle survey features \cite{course,brfss}.
+The label describes reported coronary heart disease,
+myocardial infarction, or angina history, rather than a
+prospectively observed clinical outcome.
+
+The released dataset contains 328,135 labeled observations
+and 321 input features, excluding identifiers. Labels are
+$y\in\{-1,+1\}$, with approximately 8.83\% positives.
+The 109,379 competition test observations have no supplied
+labels. This imbalance makes positive-class F1, precision,
+and recall important alongside accuracy.
+
+Survey codes require variable-specific interpretation
+\cite{codebook}. For example, \texttt{PHYSHLTH}=88 represents
+zero days, whereas 77 and 99 represent nonresponse.
+Treating these codes as ordinary magnitudes can distort
+the feature representation.
+
+\section{Experimental Setup and Preprocessing}
+\subsection{Validation protocol}
+We shuffle row indices using
+\texttt{np.random.default\_rng(42)} and allocate the first
+$\lfloor0.25N\rfloor$ observations to validation. This gives
+246,102 training and 82,033 validation observations, including
+21,737 and 7,238 positives, respectively. The split is not
+stratified and is identical across the reported comparisons.
+
+Imputation, scaling, category vocabularies, and supervised
+feature selection are fitted only on the training subset.
+Validation and competition test observations do not
+participate in these fitting steps.
+
+\subsection{Earlier partial-feature baseline}
+The initial pipeline uses six columns with one observed
+nonmissing value, filling missing entries with $-1$, and
+111 ordered or numerical columns. Variable-specific rules
+map survey codes to numerical values or missing entries.
+Numerical missing values are mean-imputed and standardized
+using training statistics.
+
+Including an intercept gives 118 columns. After transformation,
+\texttt{CTELNUM1} and \texttt{CELLFON2} are both exactly
+$-\texttt{CTELENUM}$. Removing these two redundant columns
+gives 116 independent inputs for the linear-model comparison.
+
+\subsection{Extended preprocessing and selection}
+We use Shu's updated preprocessing definitions at repository
+revision \texttt{f6baef4}. The pipeline includes 5 one-value,
+111 ordered, 14 decoded, and 157 categorical raw variables.
+It excludes 29 designated variables and 5 decoding candidates
+not implemented in that revision.
+
+The numerical groups receive training-mean imputation and
+standardization. Decoding converts supported survey
+representations, such as encoded weight and frequency
+values, into numerical quantities. Categorical variables
+are one-hot encoded, including an observed missing-value
+category; unseen validation levels produce all-zero entries.
+This yields 1,100 columns including the intercept.
+
+Shu's L1-regularized logistic selector uses binary 0/1 labels,
+regularization 0.02, step size 0.2, and 2,000 subgradient
+iterations. We retain coefficients with absolute value
+above 0.001 and always retain the intercept. Fitted on the
+training subset, this selects 844 columns.
+
+To support unregularized least squares, we remove numerical
+dependencies using training-only pivoted Gram elimination,
+with squared relative residual tolerance $10^{-10}$.
+Both linear methods then use the same 734 retained columns.
+The largest discarded relative residual is
+$8.22\times10^{-7}$. Removing columns changes ridge's penalty
+representation, so we also evaluate ridge before this step.
+
+\section{Models and Evaluation}
+For the transformed matrix $X\in\mathbb{R}^{n\times d}$,
+including the intercept, the course loss is
+\begin{equation}
+L(w)=\frac{1}{2n}\lVert y-Xw\rVert_2^2.
+\end{equation}
+Setting its gradient to zero gives the least-squares
+normal equations. Ridge adds $\lambda\lVert w\rVert_2^2$:
+\begin{align}
+(X^\top X)w &= X^\top y,\\
+(X^\top X+2n\lambda I_d)w &= X^\top y.
+\end{align}
+We use \texttt{np.linalg.solve} without explicitly computing
+an inverse. Both shared functions return \texttt{(w, loss)};
+ridge returns the data loss without the penalty
+\cite{course}. Following the lab convention, the penalty
+includes the intercept.
+
+The regression score $s=Xw$ is not a probability.
+We predict $+1$ when $s\geq t$ and $-1$ otherwise.
+The fixed comparison uses the earlier threshold $t=-0.55$
+and ridge $\lambda=0.001$.
+
+For model selection, we search ridge penalties
+$\{10^{-5},10^{-4},10^{-3},10^{-2},10^{-1},1\}$ and thresholds
+from $-0.90$ to $0.00$ in steps of $0.01$, maximizing
+validation F1:
+\begin{equation}
+F_1=\frac{2TP}{2TP+FP+FN}.
+\end{equation}
+Selected thresholds are $-0.57$ for least squares and
+$-0.56$ for ridge, with ridge $\lambda=10^{-4}$.
+These selected scores reuse validation labels for tuning;
+they are not independent test estimates.
+
+\section{Results and Discussion}
+\begin{table}[t]
+\centering
+\caption{Local validation results on the same split.
+Partial denotes the earlier representation.
+Fixed uses $t=-0.55$ and ridge $\lambda=0.001$.
+Tuned uses validation-selected settings.}
+\label{tab:results}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Method & Acc. & Prec. & Recall & F1 \\
+\midrule
+Always negative & .9118 & .0000 & .0000 & .0000 \\
+LS, partial & .8771 & .3255 & .3661 & .3446 \\
+Ridge, partial & .8781 & .3272 & .3613 & .3434 \\
+\midrule
+LS, fixed & .8758 & .3608 & .5287 & .4289 \\
+Ridge, fixed & .8752 & .3599 & .5327 & .4296 \\
+LS, tuned & .8693 & .3490 & .5569 & .4291 \\
+Ridge, tuned & .8728 & .3555 & .5434 & .4298 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+At fixed model settings, the extended pipeline increases
+F1 by 0.0843 for least squares and 0.0862 for ridge
+(Table~\ref{tab:results}). Recall increases substantially,
+while accuracy decreases slightly. The comparison combines
+categorical encoding, decoding, feature selection, and rank
+handling; it does not identify the isolated contribution
+of any individual transformation.
+
+Parameter search adds only approximately 0.0002 F1 over
+the corresponding fixed-setting results. The tuned ridge
+and least-squares scores differ by less than 0.001, which
+does not establish general superiority on one split.
+
+For tuned least squares, training and validation half-MSE
+are 0.129122 and 0.130538. For tuned ridge, they are
+0.129242 and 0.130442. These modest gaps do not suggest
+severe training-set overfitting, although repeated use of
+the validation set limits generalization claims.
+
+Before rank reduction, selected-input ridge at the fixed
+settings achieves F1 0.429598, compared with 0.429614 after
+reduction. This small observed difference is consistent
+with rank handling primarily enabling a stable shared
+comparison in this experiment.
+
+The always-negative predictor achieves 91.18\% accuracy
+but zero recall and F1. Consequently, accuracy alone would
+favor a classifier that detects no positive observations.
+Our results highlight the value of reporting several
+metrics under class imbalance.
+
+\section{Verification and Reproducibility}
+The experiments import the shared methods from
+\texttt{implementations.py}. All six required methods are
+integrated locally. In the supplied grading environment
+(Python 3.9.25, NumPy 1.23.1), 27 local public checks pass,
+including the numerical tests and formatting check.
+The commit-URL check requires a published final revision.
+Four additional tests verify preprocessing consistency,
+compact versus dense computations, fitted-state reuse,
+and rank handling.
+
+The dataset experiments use Python 3.14.6 and NumPy 2.4.6.
+The review notebook is
+\texttt{experiments/Yusen\_final\_preprocessing.ipynb};
+JSON records preserve settings, metrics, feature counts,
+source revisions, and data hashes.
+
+After model selection, we refit preprocessing, L1 selection,
+and both linear models on all 328,135 labeled observations.
+This produces 1,104 expanded columns, 838 selected columns,
+and 731 independent model inputs. These counts differ from
+the validation fit because the fitted data and vocabularies
+differ.
+
+The command
+\texttt{python run.py --model both --predict-only}
+reproduces both candidates from included fitted parameters.
+Each CSV contains 109,379 predictions. We verify headers,
+test-ID order, row counts, and labels, and repeated prediction
+produces identical file hashes. These candidates have not
+been scored on AIcrowd by this workflow.
+
+\noindent\textbf{Pending team integration.}
+Before submission, add the confirmed GD/SGD and logistic
+experiment details, identify the team's selected final
+pipeline and competition score, and verify its immutable
+repository URL \cite{repository}. The comparisons above
+cover the linear-model contribution.
+
+\section{Conclusion}
+The extended preprocessing pipeline improves positive-class
+F1 from approximately 0.34 to 0.43 under matched fixed model
+settings. Subsequent parameter tuning provides little
+additional improvement. Least squares and ridge perform
+similarly, while majority-class accuracy obscures failure
+to detect positives. Training-only transformations, explicit
+rank handling, and reproducible candidate predictions
+provide a documented basis for final team integration.
+
+\begin{thebibliography}{4}
+\bibitem{course}
+EPFL CS-433 Teaching Team,
+``Machine Learning Course: Class Project 1,''
+course-provided project specification, 2026.
+\bibitem{brfss}
+Centers for Disease Control and Prevention,
+``2015 BRFSS Survey Data and Documentation.''
+[Online]. Available:
+\url{https://www.cdc.gov/brfss/annual_data/annual_2015.html}
+\bibitem{codebook}
+Centers for Disease Control and Prevention,
+``BRFSS 2015 Codebook Report:
+Land-Line and Cell-Phone Data,'' Aug. 23, 2016.
+\bibitem{repository}
+A. Glegola, S. Ito, and Y. Haung,
+``CS-433 Project 1: Team Repository,'' 2026.
+[Online]. Available:
+\url{https://github.com/shuito1127/cs433-project1}
+\end{thebibliography}
+\end{document}

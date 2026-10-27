@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def train_val_split(X, y, val_ratio, seed=42):
     assert len(X) == len(y)
     assert 0 < val_ratio < 1
@@ -11,7 +12,7 @@ def train_val_split(X, y, val_ratio, seed=42):
 
     rng.shuffle(indices)
 
-    n_val = int(N*val_ratio)
+    n_val = int(N * val_ratio)
 
     val_indices = indices[:n_val]
     train_indices = indices[n_val:]
@@ -23,12 +24,13 @@ def train_val_split(X, y, val_ratio, seed=42):
 
     return X_train, X_val, y_train, y_val
 
+
 def fit_standardize(x):
     centered_data = np.mean(x, axis=0)
-    std=np.std(x,axis=0)
-    std_data = (x-centered_data) / std
+    std = np.std(x, axis=0)
+    std_data = (x - centered_data) / std
     return std_data, centered_data, std
 
-def transform_standarize(x,centered_data,std):
-    return (x-centered_data)/std
 
+def transform_standarize(x, centered_data, std):
+    return (x - centered_data) / std

@@ -11,7 +11,9 @@ __pycache__/
 
 # Test and notebook artefacts
 .pytest_cache/
+/pytest-cache-files-*/
 .ipynb_checkpoints/
+/artifacts/
 
 # OS/editor artefacts
 .DS_Store
