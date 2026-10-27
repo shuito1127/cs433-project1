@@ -1504,7 +1504,7 @@ def main():
     w_reglog, loss_reglog=reg_logistic_regression(
     y_train,
     x_train_selected,
-    lambda_=0,
+    lambda_=1e-5,
     initial_w=np.zeros(x_train_selected.shape[1]),
     max_iters=2000,
     gamma=0.2)
@@ -1512,7 +1512,7 @@ def main():
 #prediction
     prob_test = 1 / (1 + np.exp((-x_test_selected @ w_reglog)))
     y_pred_test_log = np.where(
-    prob_test >= 0.20,
+    prob_test >= 0.21,
     1,
     -1
     )
@@ -1521,7 +1521,7 @@ def main():
     create_csv_submission(
     test_ids,
     y_pred_test_log,
-    "reg_logistic_featureselect_baseline4.csv"
+    "reg_logistic.csv"
     )
 
 
