@@ -1,71 +1,205 @@
 # Shu's Contribution
 
-## 1. Main Contribution
+## 1. Main Contributions
 
-My main responsibilities were:
+My main contributions to Project 1 were:
 
-- Implementing Logistic Regression and L2-Regularized Logistic Regression.
-- Designing the codebook-based preprocessing pipeline.
-- Classifying the 321 raw BRFSS features into numerical, ordered, decoded numerical, categorical, and drop-candidate groups.
-- Handling variable-specific missing and special-value codes.
-- Implementing mean imputation, standardization, numerical decoding, and one-hot encoding with NumPy.
-- Implementing and evaluating L1-based feature selection.
-- Performing validation and classification-threshold tuning.
-- Integrating the final preprocessing and prediction workflow into `run.py`.
-
-The goal was to make the full pipeline reproducible from the raw CSV files without relying on notebook execution order.
+- Implemented `logistic_regression`.
+- Implemented `reg_logistic_regression`.
+- Designed the codebook-based preprocessing pipeline.
+- Classified the 321 raw BRFSS features into:
+  - `one_value`
+  - `ordered`
+  - `decode_ordered`
+  - `categorical`
+  - `drop_candidate`
+- Implemented variable-specific missing / special-value handling.
+- Implemented mean imputation and standardization using NumPy.
+- Implemented decoding rules for survey-specific numerical variables.
+- Implemented one-hot encoding for categorical variables.
+- Implemented L1-Regularized Logistic Regression for feature selection.
+- Performed validation for regularization and classification threshold.
+- Integrated the final preprocessing and prediction pipeline into `run.py`.
 
 ---
 
 ## 2. Preprocessing
 
-The BRFSS dataset contains many numerical-looking values that actually represent categories, missing codes, or encoded quantities. Therefore, I used the official codebook to determine how each feature should be handled.
+The BRFSS dataset contains many numerical-looking variables that actually represent categories, missing codes, or encoded quantities.
+
+The preprocessing pipeline therefore uses the official codebook to determine how each variable should be handled.
+
+### Numerical / Ordered Features
 
 The main preprocessing steps were:
 
-- Variable-specific missing / special-code handling.
-- Mean imputation using statistics fitted only on the training data.
-- Standardization using training mean and standard deviation.
-- Decoding survey-specific variables such as weight, height, frequency, time, and date encodings.
-- One-hot encoding categorical variables using categories identified from the training data.
-
-An important issue was that some values in the course CSV differed from the raw codebook representation. For example, `MAXVO2_` and `FC60_` use `999` as the missing code in the actual course CSV, while `PAFREQ1_`, `PAFREQ2_`, and `STRFREQ_` use `99`. These mappings were verified directly from the training data.
-
-The general principle was:
+1. Apply variable-specific rules for special values.
+2. Convert missing values to `NaN`.
+3. Impute missing values using the training mean.
+4. Standardize using the training mean and standard deviation.
+5. Apply the same fitted parameters to validation and test data.
 
 ```text
-Training data: fit + transform
-Validation/test data: transform only
+Training:
+fit + transform
+
+Validation / Test:
+transform only
 ```
 
+### Decoded Numerical Features
+
+Several survey-specific variables were converted into more meaningful numerical representations.
+
+Examples include:
+
+| Variable                 | Processing                                                 |
+| ------------------------ | ---------------------------------------------------------- |
+| `WEIGHT2`                | Converted weight codes to kilograms                        |
+| `HEIGHT3`                | Converted feet/inches or metric codes to centimeters       |
+| `ALCDAY5`                | Converted weekly/monthly frequency to a common scale       |
+| Food-frequency variables | Converted daily/weekly/monthly codes to common frequencies |
+| `EXEROFT1`, `EXEROFT2`   | Converted exercise-frequency encodings                     |
+| `EXERHMM1`, `EXERHMM2`   | Converted HHMM values to minutes                           |
+| `BLDSUGAR`               | Converted different frequency units to a common scale      |
+| `FLSHTMY2`, `HIVTSTD3`   | Converted MMYYYY values to a month index                   |
+
+### Categorical Features
+
+Categorical variables were encoded using one-hot encoding implemented with NumPy.
+
+Categories were fitted using the training data and the same category mapping was reused for validation and test data.
+
+In one version of the pipeline:
+
+```text
+157 categorical variables
+→ approximately 969 one-hot features
+```
+
+### Missing-Code Corrections
+
+Some values in the course CSV differed from the raw codebook representation.
+
+The following values were verified directly from the training CSV:
+
+| Variable   | Missing code |
+| ---------- | -----------: |
+| `MAXVO2_`  |        `999` |
+| `FC60_`    |        `999` |
+| `PAFREQ1_` |         `99` |
+| `PAFREQ2_` |         `99` |
+| `STRFREQ_` |         `99` |
+
 ---
 
-## 3. Experiments and Performance
+## 3. Model Implementations
 
-The pipeline was improved incrementally.
+My assigned implementations were:
 
-| Stage | Main change | Validation F1 | AIcrowd F1 |
-| --- | --- | ---: | ---: |
-| Initial baseline | One-value + ordered features, Ridge Regression | 0.343 | — |
-| Add categorical features | One-hot categorical features | 0.426 | — |
-| Logistic Regression | Logistic model + threshold tuning | 0.432 | ~0.445 |
-| Early L1 feature selection | L1-based feature reduction | ~0.431 | 0.439–0.442 |
-| Final pipeline | L1 selection + L2 Reg-Log + threshold tuning | best region around 0.20–0.21 | **0.447** |
+```python
+logistic_regression(
+    y,
+    tx,
+    initial_w,
+    max_iters,
+    gamma
+)
+```
 
-Using directly comparable validation results, F1 improved from approximately **0.343 to 0.432**, an absolute improvement of about **0.089**.
+and:
 
-The largest early improvement came from representing categorical survey information correctly rather than simply increasing model complexity.
+```python
+reg_logistic_regression(
+    y,
+    tx,
+    lambda_,
+    initial_w,
+    max_iters,
+    gamma
+)
+```
+
+The original dataset uses labels:
+
+```text
+{-1, +1}
+```
+
+so the labels are converted to:
+
+```text
+{0, 1}
+```
+
+before Logistic Regression training.
+
+I also implemented an L1-Regularized Logistic Regression using a subgradient for feature-selection experiments.
 
 ---
 
-## 4. Final Best Pipeline
+## 4. Performance Progression
+
+| Stage                      | Main change                                  | Validation F1 |  AIcrowd F1 |
+| -------------------------- | -------------------------------------------- | ------------: | ----------: |
+| Initial baseline           | One-value + ordered, Ridge Regression        |         0.343 |           — |
+| Add categorical features   | One-hot categorical features                 |         0.426 |           — |
+| Logistic Regression        | Logistic + classification-threshold tuning   |         0.432 |     \~0.445 |
+| Early L1 feature selection | L1-selected feature set                      |       \~0.431 | 0.439–0.442 |
+| Final pipeline             | L1 selection + L2 Reg-Log + threshold tuning |               |   **0.447** |
+
+Using directly comparable validation results:
+
+```text
+0.343 → 0.432
+```
+
+which corresponds to an absolute improvement of approximately:
+
+```text
++0.089
+```
+
+The largest improvement came from adding properly encoded categorical variables.
+
+---
+
+## 5. L1 Feature Selection
+
+L1-Regularized Logistic Regression was used to select features based on the magnitude of the learned weights.
+
+The workflow was:
+
+```text
+full feature matrix
+→ L1 Logistic Regression
+→ select features using |w|
+→ retain the same features for train/test
+→ retrain L2-Regularized Logistic Regression
+```
+
+Current feature-selection parameters:
+
+| Parameter                   |   Value |
+| --------------------------- | ------: |
+| L1 lambda                   |  `0.02` |
+| Feature-selection threshold | `0.001` |
+
+Feature selection substantially reduced the number of features while maintaining similar performance.
+
+After tuning the downstream model, the feature-selected version became the current best pipeline.
+
+---
+
+## 6. Final Best Pipeline
 
 The current best pipeline is:
 
 ```text
 raw data
 → codebook-based preprocessing
-→ one-hot encoding
+→ categorical one-hot encoding
+→ feature concatenation
 → L1 feature selection
 → L2-Regularized Logistic Regression
 → classification threshold
@@ -74,94 +208,46 @@ raw data
 
 Final configuration:
 
-| Parameter | Value |
-| --- | ---: |
-| L1 lambda | `0.02` |
+| Parameter                   |   Value |
+| --------------------------- | ------: |
+| L1 lambda                   |  `0.02` |
 | Feature-selection threshold | `0.001` |
-| Final L2 lambda | `1e-5` |
-| Classification threshold | `0.21` |
-| Gamma | `0.2` |
-| Max iterations | `2000` |
+| Final L2 lambda             |  `1e-5` |
+| Classification threshold    |  `0.21` |
+| Gamma                       |   `0.2` |
+| Max iterations              |  `2000` |
 
-Best AIcrowd result:
+Current best AIcrowd result:
 
-| Metric | Score |
-| --- | ---: |
+| Metric       |     Score |
+| ------------ | --------: |
 | **F1 Score** | **0.447** |
 | **Accuracy** | **0.882** |
 
-The L1 feature-selection step initially only reduced dimensionality while keeping similar performance. However, after tuning the downstream L2 regularization and classification threshold, the feature-selected pipeline became the best-performing version.
-
 ---
 
-## 5. Debugging and Lessons
+## 7. `run.py`
 
-Several bugs occurred while building the pipeline.
+I consolidated the final pipeline into `run.py`.
 
-One issue came from notebook execution order: training features were standardized while some test features were still using raw values. This caused severe train/test distribution mismatch.
-
-Another issue was label representation. The original dataset uses `{-1, +1}`, while the logistic loss expects `{0, 1}`.
-
-I also introduced a sigmoid sign error in the first `run.py` version:
-
-```python
-1 / (1 + np.exp(z))
-```
-
-instead of:
-
-```python
-1 / (1 + np.exp(-z))
-```
-
-This produced almost all-positive predictions and an AIcrowd result of approximately F1 `0.159` and accuracy `0.087`.
-
-These problems were diagnosed using:
-
-- feature ranges,
-- NaN counts,
-- prediction counts,
-- positive prediction rate,
-- probability distributions,
-- validation / submission metrics.
-
-This taught me to debug the whole pipeline systematically instead of assuming that a low score always means the model itself is bad.
-
----
-
-## 6. Collaboration
-
-I am currently studying abroad at EPFL and am still improving my confidence in technical discussions in English.
-
-Rather than avoiding tasks requiring discussion, I intentionally worked on preprocessing, where many decisions were ambiguous and required communication with teammates.
-
-My workflow was:
+It performs:
 
 ```text
-form a hypothesis
-→ check the codebook
-→ inspect the actual data
-→ implement
-→ discuss with teammates
-→ revise based on feedback
+raw CSV loading
+→ preprocessing
+→ feature concatenation
+→ feature selection
+→ model training
+→ test prediction
+→ submission CSV generation
 ```
 
-For example, when a teammate pointed out possible inconsistencies in several missing-value codes, I verified the actual values in the training CSV and corrected the preprocessing rules.
-
-This project showed me that even when communication is not perfect, technical collaboration works well when decisions are supported by concrete evidence.
-
----
-
-## 7. Final Integration
-
-The final workflow was consolidated into `run.py`, which performs preprocessing, feature selection, model training, prediction, and submission generation in a single reproducible execution.
-
-To run the final pipeline:
+To execute the final pipeline:
 
 ```bash
 python run.py
 ```
 
-Validation and model-comparison experiments remain in the experiment notebook.
+Validation and model-comparison experiments are kept in the experiment notebook.
 
-The model section in `run.py` can also be replaced with other implementations from `implementations.py`, allowing the same preprocessing pipeline to be reused across different models.
+The model section of `run.py` can also be replaced with another implementation from `implementations.py` to evaluate another model using the same preprocessing pipeline.
