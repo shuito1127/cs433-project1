@@ -24,3 +24,6 @@ Thumbs.db
 
 # Local copy of official grading tools
 /grading_tests/
+
+# Generated numeric cache for the final runner
+/artifacts/
